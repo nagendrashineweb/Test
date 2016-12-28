@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="format-detection" content="telephone=no" />
+    <meta name="msapplication-tap-highlight" content="no" />
+    <!-- WARNING: for iOS 7, remove the width=device-width and height=device-height attributes. See https://issues.apache.org/jira/browse/CB-4323 -->
+    <meta name="viewport" content="user-scalable=no, initial-scale=1, maximum-scale=1, minimum-scale=1, width=device-width, height=device-height " />
+    <link rel="stylesheet" type="text/css" href="css/index.css" />
+    <title>Register</title>
+    <script type="text/javascript" src="cordova.js"></script>
+    <script src="js/lib/require.js"></script>
+    <script src="js/config.js"></script>
+    <script type="text/javascript">
+      require(['jquery','register', 'user' ], function ($, reg, user) {
+        //   $('input, textarea, select')
+        // .on('focus', function (e) {
+        //     $('.header').css('position', 'absolute');
+        // })
+        // .on('blur', function (e) {
+        //     $('.header').css('position', 'fixed');
+        //     //force page redraw to fix incorrectly positioned fixed elements
+        //     /*setTimeout( function() {
+        //         window.scrollTo( $.mobile.window.scrollLeft(), $.mobile.window.scrollTop() );
+        //     }, 20 );*/
+        // });
+
+        $('input, textarea').on('input', function() {
+          if ($('.inp1').val().length && $('.inp2').val().length && $('.inp3').val().length && $('.inp4').val().length) {
+            $('#cont-btn').removeClass('inactive');
+          } else {
+            $('#cont-btn').addClass('inactive');
+          }
+        });
+
+          $('.inner-content').fadeIn();
+      });
+    </script>
+  </head>
+  <body style='background-color: #EC1C24;'>
+    <div class="header">
+      <div class="header-back"><div class="h-arrow-left"></div></div>
+      <h2 class="header-title"><span class="header-title-dash">&mdash;</span> Paperwork <span class="header-title-dash">&mdash;</span></h2>
+    </div>
+    <div class="under-header"></div>
+    <div class="content">
+      <div class="inner-content" style="display:none;">
+        <h1 class="signup-title">Email Sign Up</h1>
+        <h2 class="signup-subtitle">Fill in the fields below to get cracking</h2>
+        <div class="dash-divider"></div>
+        <div class="dash-divider-padding2"></div>
+        <form id="register-form">
+          <input autocapitalize="on" class="white-input inp1" type="text" name="first_name" placeholder="FIRST NAME" required>
+          <input autocapitalize="on" class="white-input inp2" type="text" name="last_name" placeholder="SECOND NAME" required>
+          <input id="reg-email" autocapitalize="off" class="white-input inp3" type="email" name="email" placeholder="EMAIL ADDRESS" required data-parsley-type="email">
+          <input autocapitalize="off" class="white-input inp4 last" type="password" name="password" placeholder="PASSWORD" required>
+          <br/>
+          <div class="terms-cb-wrapper">
+            <input type="checkbox" name="terms" value="terms" class="terms-cb" id="termscb" required><label for="termscb"></label><span class="terms-cb-text">I accept <a href="tnc_nomenu.html" class="terms-cb-text">the terms and conditions</a></span>
+          </div>
+          <div class="dash-divider-padding2"></div>
+          <div class="signup-bottom">
+            <div class="dash-divider"></div>
+
+            <input class="short-button inactive" id="cont-btn" href='registerwith.html' type="submit" value="Continue">
+          </div>
+        </form>
+      </div>
+    </div>
+  </body>
+</html>

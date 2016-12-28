@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="format-detection" content="telephone=no" />
+    <meta name="msapplication-tap-highlight" content="no" />
+    <!-- WARNING: for iOS 7, remove the width=device-width and height=device-height attributes. See https://issues.apache.org/jira/browse/CB-4323 -->
+    <meta name="viewport" content="user-scalable=no, initial-scale=1, maximum-scale=1, minimum-scale=1, width=device-width, height=device-height " />
+    <link rel="stylesheet" type="text/css" href="css/index.css" />
+    <link rel="stylesheet" type="text/css" href="css/jquery.mobile.custom.structure3.css" />
+    <link rel="stylesheet" type="text/css" href="css/jquery.sidr.dark.css" />
+    <title>Club</title>
+    <script type="text/javascript" src="cordova.js"></script>
+    <script src="js/lib/require.js"></script>
+    <script src="js/config.js"></script>
+    <script type="text/javascript">
+      var club_stats_c;
+      require(['jquery', 'club_stats_controller', 'squad_controller', 'fixtures_controller', 'panel-nojqm', 'sidr', 'user', 'dragend', 'general' ], function ($, club_stats_controller, squad_controller, fixture, panel, sidr, user, dragend, general) {
+
+        general.showLoader();
+
+        setTimeout(function() { if ($('.spinner-overlay').data('display') == "0") $('.spinner-overlay').show();}, 500);
+
+        var teamid = -1;
+        var query = window.location.search.substring(1);
+        var pathArray = query.split("&");
+        if (pathArray[0].indexOf('team') > -1) {
+            pathArray = pathArray[0].split('=');
+            console.log(pathArray);
+            teamid = pathArray[1];
+        }
+
+        if (teamid < 0) {
+            teamid = parseInt(user.getUser().team_id);
+        }
+
+        club_stats_c = club_stats_controller;
+
+        club_stats_controller.init(teamid);
+        squad_controller.init(teamid);
+        fixture.init(teamid);
+        panel.init();
+
+        //Swipe stuff - dragend js
+        var firstChild = $("#swipe-content li:first-child").clone(),
+            lastChild  = $("#swipe-content li:last-child").clone(),
+            container  = $("#swipe-content ul");
+
+        firstChild.appendTo(container);
+        lastChild.prependTo(container);
+
+        var prevpage = 0;
+
+        $("#swipe-content").dragend({
+          jumpToPage: 2,
+          onSwipeEnd: function() {
+            if (this.page == prevpage) {
+              return;
+            }
+            $('.content').removeClass('ui-page-active');
+
+            currentPage = this.page;
+            if (currentPage == 0) {
+              currentPage = this.pages.length - 2;
+            }
+
+            if (currentPage == this.pages.length-1) {
+              currentPage = 1;
+            }
+
+            prevpage = currentPage;
+
+            $cr = $("#swipe-content li").eq(currentPage);
+            $cr.find('.content').addClass('ui-page-active');
+
+            var first = this.pages[0],
+                last = this.pages[this.pages.length - 1];
+
+            if (first === this.activeElement) {
+              this.jumpToPage(this.pages.length - 1 );
+            }
+
+            if (last === this.activeElement) {
+              this.jumpToPage(2);
+            }
+            
+          },
+          afterInitialize: function() {
+            this.container.style.visibility = "visible";
+            $("#swipe-content li:nth-child(2)").find('.content').addClass('ui-page-active');
+            prevpage = 1;
+          }
+        });
+      });
+    </script>
+  </head>
+  <body class="no-bg">
+    <div class="sm-overlay"></div>
+      <div class="header">
+        <a class="header-menu" id="side-menu-link" href="#sidemenu" data-ajax="false"></a>
+      </div>
+      <!-- <div class="spinner-overlay" style="display:none;" data-display="0">
+        <div class="spinner">
+          <div class="rect1"></div>
+          <div class="rect2"></div>
+          <div class="rect3"></div>
+          <div class="rect4"></div>
+          <div class="rect5"></div>
+        </div>
+      </div> -->
+      <div id="swipe-content">
+        <ul>
+          <li class="dragend-page">
+            <div class="content content-stats" data-role="page" data-prev="fixtures" data-next="club_squad" data-type="stats" data-dom-cache="true">
+              <div class="swipe-bar">
+                <div class="sb-text sb-left">
+                  <span class="sb-l-m" style="margin-left:-19px;">Fixtures</span>
+                </div><div class="sb-text sb-center">
+                  Overview
+                </div><div class="sb-text sb-right">
+                  <span class="sb-r-m" style="margin-right:-15px;">Squad</span>
+                </div>
+                <div class="swipe-bar-shadow"></div>
+              </div>
+              <div class="inner-content" style="display:none;">
+                <div class="h-92"></div>
+                <div class="title-nav title-nav-pp">
+                    <div class="title-bar" id="selected-team"></div>
+                    <div class="title-team-badge"></div>
+                </div>
+                <a href="league.html" class="info-box ib-clickable" data-ajax="false">
+                    <h4>League Position :</h4>
+                    <h5 id="team-position"></h5>
+                </a>
+                <a href="" id="team-prev-href" class="info-box ib-clickable" data-ajax="false">
+                    <h4>Previous Match :</h4>
+                    <h5 id="team-prev-match"></h5>
+                </a>
+                <a href="" id="team-next-href" class="info-box ib-clickable mb-0" data-ajax="false">
+                    <h4>Next Match :</h4>
+                    <h5 id="team-next-match"></h5>
+                </a>
+                <div class="info-box-dd">
+                    <div class="ib-dd-top ibd1">
+                        <span class="arrow-up"></span><h4>Top Three</h4>
+                    </div>
+                    <div class="ib-dd-content">
+                        <div id="team-top-players"></div>
+                    </div>
+                </div>
+                <div class="info-box-dd">
+                    <div class="ib-dd-top ibd2">
+                        <span class="arrow-up"></span><h4>Bottom Three</h4>
+                    </div>
+                    <div class="ib-dd-content">
+                        <div id="team-bottom-players"></div>
+                    </div>
+                </div>
+                <div class="info-box">
+                    <h4>Manager :</h4>
+                    <h5 id="team-manager"></h5>
+                </div>
+                <div class="info-box">
+                    <h4>Stadium :</h4>
+                    <h5 id="team-stadium"></h5>
+                </div>
+                <div class="info-box">
+                    <h4>Founded :</h4>
+                    <h5 id="team-founded"></h5>
+                </div>
+                <br/>
+                <div class="mb-60"></div>
+              </div>
+            </div>
+          </li>
+          <li class="dragend-page">
+            <div class="content content-squad" data-prev="club_stats" data-next="fixtures" data-role="page" data-type="squad" data-dom-cache="true">
+              <div class="swipe-bar">
+                  <div class="sb-text sb-left">
+                      <span class="sb-l-m" style="margin-left:-23px;">Overview</span>
+                  </div><div class="sb-text sb-center">
+                      Squad
+                  </div><div class="sb-text sb-right">
+                      <span class="sb-r-m" style="margin-right:-19px;">Fixtures</span>
+                  </div>
+                  <div class="swipe-bar-shadow"></div>
+              </div>
+              <div class="inner-content" style="display:none;">
+                  <div class="h-92"></div>
+                  <div class="title-nav title-nav-pp hw-accel">
+                      <div class="title-bar" id="selected-team2"></div>
+                      <div class="title-team-badge"></div>
+                  </div>
+                  <div class="info-box-dd2 hw-accel">
+                      <div class="ib-dd-top">
+                          <span class="arrow-up"></span><h4>Goalkeepers</h4>
+                      </div>
+                      <div class="ib-dd-content">
+                          <div id="members-container-gk"></div>
+                      </div>
+                  </div>
+                  <div class="info-box-dd2 hw-accel">
+                      <div class="ib-dd-top">
+                          <span class="arrow-up"></span><h4>Defenders</h4>
+                      </div>
+                      <div class="ib-dd-content">
+                          <div id="members-container-df"></div>
+                      </div>
+                  </div>
+                  <div class="info-box-dd2 hw-accel">
+                      <div class="ib-dd-top">
+                          <span class="arrow-up"></span><h4>Midfielders</h4>
+                      </div>
+                      <div class="ib-dd-content">
+                          <div id="members-container-md"></div>
+                      </div>
+                  </div>
+                  <div class="info-box-dd2 last hw-accel">
+                      <div class="ib-dd-top">
+                          <span class="arrow-up"></span><h4>Forwards</h4>
+                      </div>
+                      <div class="ib-dd-content">
+                          <div id="members-container-fw"></div>
+                      </div>
+                  </div>
+                  <div class="mb-60"></div>
+              </div>
+            </div>
+          </li>
+          <li class="dragend-page">
+            <div class="content content-fixtures" data-prev="club_squad" data-next="club_stats" data-role="page" data-type="fixtures" data-dom-cache="true">
+              <div class="swipe-bar">
+                  <div class="sb-text sb-left">
+                      <span class="sb-l-m" style="margin-left:-15px;">Squad</span>
+                  </div><div class="sb-text sb-center">
+                      Fixtures
+                  </div><div class="sb-text sb-right">
+                      <span class="sb-r-m" style="margin-right:-23px;">Overview</span>
+                  </div>
+                  <div class="swipe-bar-shadow"></div>
+              </div>
+              <div class="inner-content" style="display:none;">
+                  <div class="h-92"></div>
+                  <div class="title-nav title-nav-pp">
+                      <div class="title-bar" id="selected-team3"></div>
+                      <div class="title-team-badge"></div>
+                  </div>
+                  <div class="info-box-dd3">
+                      <div class="ib-dd-top ibd3">
+                          <span class="arrow-up"></span><h4>Played</h4>
+                      </div>
+                      <div class="ib-dd-content">
+                          <div id='fixtures-container-prev'></div>
+                      </div>
+                  </div>
+                  <div class="info-box-dd3 last">
+                      <div class="ib-dd-top ibd4">
+                          <span class="arrow-up open"></span><h4>Remaining</h4>
+                      </div>
+                      <div class="ib-dd-content active" style="display:block;">
+                          <div id='fixtures-container'></div>
+                      </div>
+                  </div>
+                  <div class="mb-60"></div>
+              </div>
+            </div>
+          </li>
+        </ul>
+      </div>
+      <div class="bottom-nav">
+        <a class="bn-button" href="dashboard.html" data-ajax="false">HOME</a><a class="bn-button active" href="club_stats.html" data-ajax="false">CLUB</a><a class="bn-button" href="league.html" data-ajax="false">LEAGUE</a><a class="bn-button" href="stats.html" data-ajax="false">STARSTATS</a>
+      </div>
+  </body>
+</html>

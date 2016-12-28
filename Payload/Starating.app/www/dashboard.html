@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html>
+  <head>
+      <meta charset="utf-8" />
+      <meta name="format-detection" content="telephone=no" />
+      <meta name="msapplication-tap-highlight" content="no" />
+      <!-- WARNING: for iOS 7, remove the width=device-width and height=device-height attributes. See https://issues.apache.org/jira/browse/CB-4323 -->
+      <meta name="viewport" content="user-scalable=no, initial-scale=1, maximum-scale=1, minimum-scale=1, width=device-width, height=device-height" />
+      <link rel="stylesheet" type="text/css" href="css/index.css" />
+      <link rel="stylesheet" type="text/css" href="css/jquery.mobile.custom.structure3.css" />
+      <link rel="stylesheet" type="text/css" href="css/jquery.sidr.dark.css" />
+      <title>Match Days</title>
+      <script type="text/javascript" src="cordova.js"></script>
+      <script src="js/lib/require.js"></script>
+      <script src="js/config.js"></script>
+
+      <script type="text/javascript" charset="utf-8">
+
+        var query = window.location.search.substring(1);
+        var pathArray = query.split("&");
+        if (pathArray[0].indexOf('random') > -1 && window.localStorage.getItem('rndm') === "1") {
+          window.localStorage.setItem('rndm', "2");
+          window.location.reload();
+        }
+
+            // Wait for device API libraries to load
+            //
+            function onLoad() {
+                document.addEventListener("deviceready", onDeviceReady, false);
+            }
+
+            // device APIs are available
+            //
+            function onDeviceReady() {
+                // Now safe to use device APIs
+                if (navigator.splashscreen) {
+                  navigator.splashscreen.hide();
+                }
+                // console.log(window.localStorage);
+            }
+
+        </script>
+
+      <script type="text/javascript">
+        require(['jquery','dashboard', 'match_day_controller', 'panel-nojqm', 'sidr', 'dragend', 'general' ], function ($, dashboard, match_day_controller, panel, sidr, drage, general) {
+
+          //Fix for requireJS not loading all libraries properly
+          if (!$ && !$('.test').sidr) { window.location.reload(); }
+
+          console.log("finished pre-loading page");
+
+          general.showLoader();
+
+          var setMatchDay = function(md, classmd) {
+            md1 = (parseInt(md) - 1);
+            var cnr = '';
+            if (classmd) {
+              cnr = '.content-' + classmd;
+            } else {
+              currentMatchDay = md;
+            }
+
+            if (md1 >= 1) {
+              $('.content.ui-page-active'+cnr+' .sb-left').html('<span class="sb-l-m">Matchday ' + md1 + '</span>');
+              mrgl = ($('.sb-l-m').width() / 2);
+              $('.sb-l-m').css('margin-left', "-" + mrgl + 'px');
+              // $('.content.ui-page-active'+cnr+'').data('prev', 'dashboard.html?md=' + md1);
+            } else {
+              $('.content.ui-page-active'+cnr+' .sb-left').html('<span class="sb-l-m">Matchday ' + 38 + '</span>');
+              mrgl = ($('.sb-l-m').width() / 2);
+              $('.sb-l-m').css('margin-left', "-" + mrgl + 'px');
+              // $('.content.ui-page-active'+cnr+'').data('prev', 'dashboard.html?md=38');
+            }
+
+            $('.content.ui-page-active'+cnr+' .sb-center').text('Matchday ' + md);
+
+            md2 = (parseInt(md) + 1);
+            if (md2 <= 38) {
+              $('.content.ui-page-active'+cnr+' .sb-right').html('<span class="sb-r-m">Matchday ' + md2 + '</span>');
+              mrgl = ($('.sb-r-m').width() / 2);
+              $('.sb-r-m').css('margin-right', "-" + mrgl + 'px');
+              // $('.content.ui-page-active'+cnr+'').data('next', 'dashboard.html?md=' + md2);
+            } else {
+              $('.content.ui-page-active'+cnr+' .sb-right').html('<span class="sb-r-m">Matchday ' + 1 + '</span>');
+              mrgl = ($('.sb-r-m').width() / 2);
+              $('.sb-r-m').css('margin-right', "-" + mrgl + 'px');
+              // $('.content.ui-page-active'+cnr+'').data('next', 'dashboard.html?md=1');
+            }
+          }
+
+          var updateSwipeBar = function(md) {}
+
+          var currentMatchDay = -1;
+
+          var query = window.location.search.substring(1);
+          var pathArray = query.split("&");
+          if (pathArray[0].indexOf('md') > -1) {
+              pathArray = pathArray[0].split('=');
+              // console.log(pathArray);
+              currentMatchDay = pathArray[1];
+          }
+
+          if (currentMatchDay == -1 || !(currentMatchDay)) {
+            if (window && window.localStorage && window.localStorage.getItem('cmd') !== null) {
+              var cmd = window.localStorage.getItem('cmd');  
+            }
+          }
+
+          dashboard.init();
+          match_day_controller.furtherInit();
+          panel.init();
+
+          var interval;
+          var interval2;
+          var minsToRefresh = 1;
+          var secsToRefresh = 60;
+          
+          //Check for data loaded/pulled (either refresh or complete pull) from API
+          var checkLoaded = function() {
+            // console.log("checking");
+            if (dashboard.getLoaded()) {
+              match_day_controller.init(setMatchDay, currentMatchDay);
+              clearInterval(interval);
+              if (!interval2) interval2 = setInterval(refresh, 1000*minsToRefresh*60);
+            }
+          }
+          interval = setInterval(checkLoaded, 100);
+
+          var checkLoaded2 = function() {
+            // console.log("checking2");
+            if (dashboard.getLoaded()) {
+              match_day_controller.getMatchesForDay(currentMatchDay, "rom_l1", false, true);
+              clearInterval(interval);
+              if (!interval2) interval2 = setInterval(refresh, 1000*minsToRefresh*60);
+            }
+          }
+
+          //Auto-refresh interval
+          var refresh = function() {
+            // console.log("refreshing");
+            dashboard.init();
+            clearInterval(interval2);
+            interval2 = null;
+            interval = setInterval(checkLoaded2, 100);
+          }
+        
+          //Swipe stuff - dragend js
+          var firstChild = $("#swipe-content li:first-child").clone(),
+              lastChild  = $("#swipe-content li:last-child").clone(),
+              container  = $("#swipe-content ul");
+
+          for (var it = 1; it < 38; ++it) {
+            var tmp = $("#swipe-content li:first-child").clone();
+            tmp.appendTo(container);
+          }
+
+          firstChild.appendTo(container);
+          lastChild.prependTo(container);
+
+          var prevpage = 0;
+          var swipeCounter = 0;
+          var interval3;
+          var dragendObj;
+          var errorCheck = 0;
+
+          var checkSwipe = function() {
+            if (swipeCounter > 0) {
+              swipeCounter = 0;
+              errorCheck = 1;
+              // dragendObj.jumpToPage(dragendObj.page);
+              dragendObj._onSwipeEnd();
+              clearInterval(interval3);
+            }
+          }
+
+          $("#swipe-content").dragend({
+            jumpToPage: 2,
+            onSwipeStart: function () {
+              var cPage = this.page;
+              swipeCounter ++;
+              console.log('swipeStart ' + cPage);
+              // if (swipeCounter <= 1) {
+                prevpage = cPage;
+              // } else {
+                // console.log("not set prevpage");
+              // }
+              // console.log(this);
+              // clearInterval(interval3);
+              
+            },
+            onDragStart: function() {
+              clearInterval(interval3);
+              console.log("onDragStart");
+            },
+            onDragEnd: function() {
+              clearInterval(interval3);
+              interval3 = setInterval(checkSwipe, 1000);
+              console.log("onDragEnd");
+            },
+            onSwipeEnd: function() {
+              var cPage = this.page;
+              swipeCounter --;
+              if (swipeCounter > 0 && errorCheck == 0) {
+                // clearInterval(interval3);
+                // interval3 = setInterval(checkSwipe, 1000);
+                console.log('swipeCounter more than 0');
+                return;
+              }
+              if (errorCheck == 1) {
+                errorCheck = 0;
+                swipeCounter = 0;
+              }
+              console.log("swiped " + cPage + ' prev:' + prevpage);
+              /*if (Math.abs(cPage-prevpage)>1) {
+                if (cPage != 0 && cPage != 37) {
+                  // prevpage
+                  // if (cPage < prevpage) {
+
+                  // }
+                  console.log('swiped more than one at a time');
+                  return;
+                }
+              }*/
+              if (cPage == prevpage) {
+                if (cPage == 0) {
+                  this.jumpToPage(this.pages.length - 1 );
+                } else if (cPage == this.pages.length-1) {
+                  this.jumpToPage(2);
+                }
+                return;
+              }
+              $('.content').removeClass('ui-page-active');
+              /*if (cPage > prevpage) {
+                //next
+                currentMatchDay++;
+                if (currentMatchDay > 38) currentMatchDay = 1;
+              } else {
+                //prev
+                currentMatchDay--;
+                if (currentMatchDay < 1) currentMatchDay = 38;
+              }*/
+              currentMatchDay = match_day_controller.getDayForPage(cPage);
+              // this.jumpToPage(2);
+              currentPage = cPage;
+
+              if (currentPage == 0) {
+                currentPage = this.pages.length - 2;
+              }
+
+              if (currentPage == this.pages.length-1) {
+                currentPage = 1;
+              }
+
+              prevpage = currentPage;
+              leftPage = currentPage - 1;
+              rightPage = currentPage + 1;
+              lmd = currentMatchDay - 1;
+              rmd = currentMatchDay + 1;
+
+              if (leftPage <= 0) {
+                leftPage = this.pages.length - 2;
+              }
+
+              if (rightPage >= this.pages.length-1) {
+                rightPage = 1;
+              }
+
+              lmd = (lmd < 1 ? 38 : lmd);
+              rmd = (rmd > 38 ? 1 : rmd);
+
+              //current
+              $cr = $("#swipe-content li").eq(currentPage);
+              $cr.find('.content').addClass('ui-page-active');
+              $cr.find('.content').removeClass('c-initial');
+              $cr.find('.content').addClass('content-' + currentMatchDay);
+
+              if (!match_day_controller.getLoadedForDay(currentMatchDay)) {
+                setMatchDay(currentMatchDay, currentMatchDay);
+                // match_day_controller.setOpenDrawer(null);
+                match_day_controller.getMatchesForDay(currentMatchDay, "rom_l1");
+              }
+
+              //left
+              $cr = $("#swipe-content li").eq(leftPage);
+              $cr.find('.content').addClass('ui-page-active');
+              $cr.find('.content').removeClass('c-initial');
+              $cr.find('.content').addClass('content-' + lmd);
+
+              if (!match_day_controller.getLoadedForDay(lmd)) {
+                setMatchDay(lmd, lmd);
+                // match_day_controller.setOpenDrawer(null);
+                match_day_controller.getMatchesForDay(lmd, "rom_l1");
+              }
+
+              //right
+              $cr = $("#swipe-content li").eq(rightPage);
+              $cr.find('.content').addClass('ui-page-active');
+              $cr.find('.content').removeClass('c-initial');
+              $cr.find('.content').addClass('content-' + rmd);
+
+              if (!match_day_controller.getLoadedForDay(rmd)) {
+                setMatchDay(rmd, rmd);
+                // match_day_controller.setOpenDrawer(null);
+                match_day_controller.getMatchesForDay(rmd, "rom_l1");
+              }
+
+
+              var first = this.pages[0],
+                  last = this.pages[this.pages.length - 1];
+
+              if (first === this.activeElement) {
+                this.jumpToPage(this.pages.length - 1 );
+              }
+
+              if (last === this.activeElement) {
+                this.jumpToPage(2);
+              }
+
+              // console.log("end swiped");
+              
+            },
+            afterInitialize: function() {
+              this.container.style.visibility = "visible";
+              // $(this.activeElement).find('.content').addClass('ui-page-active');
+              $("#swipe-content li:nth-child(2)").find('.content').addClass('ui-page-active');
+              prevpage = 1;
+              dragendObj = this;
+            }
+          });
+
+          // general.showNoInternet();          
+
+        });
+      </script>
+  </head>
+    <body onload="onLoad()" class="fav-bg">
+      <div class="sm-overlay" data-pagetype="dashboard"></div>
+      <div class="header">
+          <a class="header-menu" id="side-menu-link" href="#sidemenu" data-ajax="false"></a>
+      </div>
+      <div class="spinner-overlay hidden" data-display="0">
+          <div class="spinner">
+            <div class="rect1"></div>
+            <div class="rect2"></div>
+            <div class="rect3"></div>
+            <div class="rect4"></div>
+            <div class="rect5"></div>
+          </div>
+          <div class="spinner-text"><h2>Downloading match information. Won't be a minute...</h2></div>
+          <div class="spinner-text-slow"><h2>Slow connection, still loading...</h2></div>
+          <div class="spinner-text-nowebs"><h2>No or very poor internet connection, please <a href="dashboard.html" data-ajax="false">try again</a></h2></div>
+      </div>
+      <div id="sidebar"></div>
+      <div id="swipe-content">
+        <ul>
+          <li class="dragend-page" style="display: none;">
+            <div class="content content-h c-initial" data-pagenr="-1">
+              <div class="swipe-bar">
+                <div class="sb-text sb-left">
+                    <!--Match Day 1-->
+                </div><div class="sb-text sb-center">
+                    <!--Match Day 2-->
+                </div><div class="sb-text sb-right">
+                    <!--Match Day 3-->
+                </div>
+                <div class="swipe-bar-shadow"></div>
+              </div>
+              <div class="inner-content" style="display:none;">
+                <div class="h-92"></div>
+                <div id="main-fixture" class="main-fixture mt-26-i">
+
+                </div>
+                <div id="other-fixtures" class="other-fixtures mb-10">
+                </div>
+                <div class="mb-60"></div>
+              </div>
+            </div>
+          </li>
+        </ul>
+      </div>
+      <div class="hidden empty-content">
+        <div class="content content-h c-initial" data-pagenr="-1">
+          <div class="swipe-bar">
+            <div class="sb-text sb-left">
+                <!--Match Day 1-->
+            </div><div class="sb-text sb-center">
+                <!--Match Day 2-->
+            </div><div class="sb-text sb-right">
+                <!--Match Day 3-->
+            </div>
+            <div class="swipe-bar-shadow"></div>
+          </div>
+          <div class="inner-content" style="display:none;">
+            <div class="h-92"></div>
+            <div class="title-nav" style="height:60px;">
+                <div class="title-bar mt-25">
+                    Barclays Premier League
+                </div>
+            </div>
+            <div id="main-fixture" class="main-fixture">
+
+            </div>
+            <div id="other-fixtures" class="other-fixtures mb-10">
+            </div>
+            <div class="mb-60"></div>
+          </div>
+        </div>
+      </div>
+      <div class="bottom-nav">
+          <a class="bn-button active" href="dashboard.html" data-ajax="false">HOME</a><a class="bn-button" href="club_stats.html" data-ajax="false">CLUB</a><a class="bn-button" href="league.html" data-ajax="false">LEAGUE</a><a class="bn-button" href="stats.html" data-ajax="false">STARSTATS</a>
+      </div>
+    </body>
+</html>

@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+
+<html>
+    <head>
+        <meta charset="utf-8" />
+        <meta name="format-detection" content="telephone=no" />
+        <meta name="msapplication-tap-highlight" content="no" />
+        <!-- WARNING: for iOS 7, remove the width=device-width and height=device-height attributes. See https://issues.apache.org/jira/browse/CB-4323 -->
+        <meta name="viewport" content="user-scalable=no, initial-scale=1, maximum-scale=1, minimum-scale=1, width=device-width " />
+        <!-- , height=device-height -->
+        <link rel="stylesheet" type="text/css" href="css/index.css" />
+        <title>Hello World</title>
+        <script type="text/javascript" src="cordova.js"></script>
+
+        <script src="js/lib/require.js"></script>
+        <script src="js/config.js"></script>
+
+        <script type="text/javascript" charset="utf-8">
+
+            // Wait for device API libraries to load
+            //
+            function onLoad() {
+                document.addEventListener("deviceready", onDeviceReady, false);
+            }
+
+            // device APIs are available
+            //
+            function onDeviceReady() {
+                // Now safe to use device APIs
+            window.requestFileSystem(LocalFileSystem.PERSISTENT, 0, FileIO.gotFS, FileIO.errorHandler);
+            }
+
+            // set some globals
+            var gImageURI = '';
+            var gFileSystem = {};
+            var url1, url2;
+            var outFilePath;
+            var isIOS2 = true;
+             
+            var FileIO = {
+             
+            // sets the filesystem to the global var gFileSystem
+             gotFS : function(fileSystem) {
+                  gFileSystem = fileSystem;
+                  console.log(gFileSystem);
+             },
+
+            setFav:function(slug) {
+              console.log(cordova.file.applicationDirectory);
+              console.log(cordova.file.dataDirectory);
+              // alert(cordova.file.dataDirectory);
+              if (isIOS2) {
+                window.resolveLocalFileSystemURL(cordova.file.applicationDirectory+'www/img/bgs/'+slug+'.png',FileIO.onGetFileWin,FileIO.onGetFileFail);
+              } else {
+                /* FOR ANDROID ONLY */
+                window.resolveLocalFileSystemURL(cordova.file.dataDirectory+'www/img/bgs/'+slug+'.png',FileIO.onGetFileWin,FileIO.onGetFileFail);
+              }
+            },
+
+            onGetFileWin:function(fileEntry) {
+              console.log("got the file");
+              // alert("got the file");
+              //dataDir1 = gFileSystem.root.getDirectory("img", {create: false});
+              url1 = fileEntry;
+              // window.resolveLocalFileSystemURL(cordova.file.applicationDirectory+'www/img/',FileIO.onGetFileWin2,FileIO.onGetFileFail);
+              if (cordova.file.documentsDirectory) {
+                outFilePath = cordova.file.documentsDirectory+'/NoCloud/';
+              } else {
+                outFilePath = cordova.file.dataDirectory;
+              }
+              window.resolveLocalFileSystemURL(outFilePath,FileIO.onGetFileWin2,FileIO.onGetFileFail);
+              // fileEntry.copyTo(cordova.file.applicationDirectory+'www/img/bgs/chelsea.png', "favbg.png", FileIO.success, FileIO.errorHandler);
+            },
+
+            onGetFileWin2:function(fileEntry) {
+              console.log("got the folder");
+              // alert("got the folder");
+              url2 = fileEntry;
+              // window.resolveLocalFileSystemURL(cordova.file.applicationDirectory+'www/img/favbg.png',FileIO.onGetFileWin3,FileIO.favbgNonexistent);
+              window.resolveLocalFileSystemURL(outFilePath+'/favbg.png',FileIO.onGetFileWin3,FileIO.favbgNonexistent);
+              // url1.copyTo(fileEntry, "favbg2.png", FileIO.success, FileIO.errorHandler);
+            },
+
+            onGetFileWin3:function(fileEntry) {
+              console.log("got the existent favbg");
+              // alert("got the existent favbg");
+              fileEntry.remove(FileIO.onGetFileWin4, FileIO.favbgNonexistent);
+            },
+
+            onGetFileWin4:function(fileEntry) {
+              console.log("removed the existent favbg");
+              // alert("removed the existent favbg");
+              url1.copyTo(url2, "favbg.png", FileIO.success, FileIO.errorHandler);
+            },
+
+            onGetFileFail:function(e) {
+              console.log("failed to get file");
+              console.log(e);
+              // alert("failed to get file");
+              // alert(e);
+              window.location.href = "dashboard.html";
+            },
+
+            favbgNonexistent:function(e) {
+              FileIO.onGetFileWin4();
+            },
+
+            success:function() {
+              console.log("copied the file");
+              // alert("copied file");
+              window.localStorage.setItem('rndm', "1");
+              window.cache.clear( function(s){console.log('cleared cache');}, function(s){console.log("error clearing cache");} );
+              window.location.href = "dashboard.html?random="+Math.random();
+            },
+             
+            // simple error handler
+             errorHandler : function(e) {
+                   var msg = '';
+                   switch (e.code) {
+                   case FileError.QUOTA_EXCEEDED_ERR:
+                           msg = 'QUOTA_EXCEEDED_ERR';
+                           break;
+                    case FileError.NOT_FOUND_ERR:
+                           msg = 'NOT_FOUND_ERR';
+                           break;
+                    case FileError.SECURITY_ERR:
+                           msg = 'SECURITY_ERR';
+                           break;
+                    case FileError.INVALID_MODIFICATION_ERR:
+                           msg = 'INVALID_MODIFICATION_ERR';
+                           break;
+                    case FileError.INVALID_STATE_ERR:
+                           msg = 'INVALID_STATE_ERR';
+                           break;
+                    default:
+                           msg = e.code;
+                    break;
+             };
+                   console.log('Error: ' + msg);
+                   console.log(e);
+                   // alert(e);
+                   window.location.href = "dashboard.html";
+             }
+            }
+
+        </script>
+        	
+        <script type="text/javascript">
+        //alert("before");
+          //  require(['jquery','login' ,'hello', 'twitter', 'user'], function ($, login, hello, twitter, user) {
+          require(['jquery','hello', 'user', 'login', 'rest'], function ($, hello, user, login, rest) {
+                var socailProvider = '';
+
+                login.setFileIO(FileIO);
+
+                function loginHandler(r){
+                  console.log("loginHandler");
+                    hello(r.network).api('me').on('complete', log);
+                }
+
+                function log(r){
+                    // console.log('this is r' + JSON.stringify(r));
+                    r.network = socailProvider;
+                    user.socialLogin(r, FileIO);
+                }
+
+                $('#fb').on('click', function(){
+                  socailProvider = 'facebook';
+                  localStorage.setItem("network", socailProvider);
+                  hello('facebook').logout();
+                  hello('facebook').login({scope:'email, user_birthday'}, loginHandler);
+                });
+
+                $('#tw').on('click', function(){
+                  socailProvider = 'twitter';
+                  localStorage.setItem("network", socailProvider);
+                  hello('twitter').logout();
+                  hello('twitter').login().then(function(r) {loginHandler(r);});
+                });
+
+                $('input, textarea').on('input', function() {
+                  if ($('#inp-email').val().length && $('#inp-pass').val().length) {
+                    $('#cont-btn').removeClass('inactive');
+                  } else {
+                    $('#cont-btn').addClass('inactive');
+                  }
+                });
+
+                // $('input, textarea')
+                // .on('focus', function (e) {
+                //     $('.header').css('position', 'absolute');
+                // })
+                // .on('blur', function (e) {
+                //     $('.header').css('position', 'fixed');
+                // });
+
+                $('.inner-content').fadeIn();
+
+            });
+        </script>
+    </head>
+  <body onload="onLoad()" style='background-color: #EC1C24;'>
+    <div class="header">
+      <div class="header-back"><div class="h-arrow-left"></div></div>
+      <h2 class="header-title"><span class="header-title-dash">&mdash;</span> Log In <span class="header-title-dash">&mdash;</span></h2>
+    </div>
+    <div class="under-header"></div>
+    <div class="content">
+      <div class="inner-content" style="display:none;">
+        <h1 class="signup-title">Email Login</h1>
+        <h2 class="signup-subtitle">Plug your details in below</h2>
+        <div class="dash-divider"></div>
+        <div class="dash-divider-padding2"></div>
+        <form id="login-form">
+          <input autocapitalize="off" class="white-input" id="inp-email" type="email" name="email" placeholder="EMAIL ADDRESS" required data-parsley-type="email">
+          <span id='email-error' class="hidden"></span>
+          <input autocapitalize="off" class="white-input last" id="inp-pass" type="password" name="password" placeholder="PASSWORD" required >
+              
+              
+              <!--  <input autocapitalize="off" class="white-input" id="inp-email" type="email" name="email" placeholder="EMAIL ADDRESS" required data-parsley-type="email" value="swspvt.ltd@gmail.com">
+               <span id='email-error' class="hidden"></span>
+               <input autocapitalize="off" class="white-input last" id="inp-pass" type="password" name="password" placeholder="PASSWORD" required value="123456">-->
+            
+          <span id='password-error' class="hidden"></span>
+        
+          <div class="dash-divider-padding2"></div>
+          <div class="signup-bottom2">
+            <div class="dash-divider"></div>
+
+            <input class="short-button inactive" id="cont-btn" href='registerwith.html' type="submit" value="Continue">
+          </div>
+        </form>
+      </div>
+    </div>
+  </body>
+</html>

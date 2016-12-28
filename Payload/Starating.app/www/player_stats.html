@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+
+<html>
+    <head>
+        <meta charset="utf-8" />
+        <meta name="format-detection" content="telephone=no" />
+        <meta name="msapplication-tap-highlight" content="no" />
+        <!-- WARNING: for iOS 7, remove the width=device-width and height=device-height attributes. See https://issues.apache.org/jira/browse/CB-4323 -->
+        <meta name="viewport" content="user-scalable=no, initial-scale=1, maximum-scale=1, minimum-scale=1, width=device-width, height=device-height " />
+        <link rel="stylesheet" type="text/css" href="css/index.css" />
+        <title>Sta Stats</title>
+        <script type="text/javascript" src="cordova.js"></script>
+        <script src="js/lib/require.js"></script>
+        <script src="js/config.js"></script>
+        <script type="text/javascript">
+          require(['jquery', 'player_stats_controller', 'general' ], function ($, player_stats_controller, general) {
+
+                general.showLoader();
+
+                setTimeout(function() { if ($('.spinner-overlay').data('display') == "0") $('.spinner-overlay').show();}, 500);
+
+                //stats_controller.setupData();
+                //    rating_controller.createChart();
+
+                //supply actual player id
+                //stats_controller.pullDataForChart(1);
+                var player = '';
+
+                var query = window.location.search.substring(1);
+                var pathArray = query.split("&");
+                if (pathArray[0].indexOf('player') > -1) {
+                  pathArray = pathArray[0].split('=');
+                  // console.log(pathArray);
+                  player = pathArray[1];
+                }
+                if(player)
+                	player_stats_controller.init(player);
+                //stats_controller.pullDataForChart(player);
+
+                $('.header-back').on('click', function(e) {
+                  window.history.back();
+                });
+          });
+        </script>
+    </head>
+    <body class="no-bg">
+        <div class="header">
+            <div class="header-back"><div class="h-arrow-left"></div></div>
+            <!--<h2 class="header-title">Dashboard</h2>-->
+        </div>
+
+        <!-- <div class="spinner-overlay" style="display:none;" data-display="0">
+          <div class="spinner">
+            <div class="rect1"></div>
+            <div class="rect2"></div>
+            <div class="rect3"></div>
+            <div class="rect4"></div>
+            <div class="rect5"></div>
+          </div>
+        </div> -->
+        <div class="content content-h" data-role="page">
+            <div class="swipe-bar">
+                <div class="sb-text sb-left">
+                </div><div class="sb-text sb-center">
+                    Player Profile
+                </div><div class="sb-text sb-right">
+                </div>
+                <div class="swipe-bar-shadow"></div>
+            </div>
+            <div class="inner-content" style="display:none;">
+                <div class="h-92"></div>
+                <div class="title-nav title-nav-pp">
+                    <div class="title-bar" id="selected-player"></div>
+                    <div class="title-team-badge"></div>
+                </div>
+
+                <div id='player-info' class="pinfo-box">
+                    <div class="pi-top">
+                        <span id="pi-apps" class="pi-t-stat pi-t-first"></span><span class="pi-t-stat pi-cs"></span><span class="pi-t-stat pi-goals"></span><span class="pi-t-stat pi-yellows"></span><span class="pi-t-stat pi-reds"></span>
+                    </div>
+
+                    <!--<div class="pi-chart-wrapper">
+                        <canvas id="myChart" class="pi-chart"></canvas>
+                    </div>-->
+                    <div class="pi-chart-legend"><span class="pi-cl-line-icon"></span><span class="pi-cl-line">Your Rating</span><span class="pi-cl-bar-icon"></span><span class="pi-cl-bar">Starating</span></div>
+                    <div class="pi-chart-wrapper">
+                        <div id="container2" class="pi-chart"></div>
+                    </div>
+                    
+                    <div class="pi-match-days-wrapper">
+                    </div>
+                    <div class="pi-match-days-text-wrapper">
+                        <div class="pi-match-days-text-left"></div>
+                        <div class="pi-match-days-text">
+                            MatchDay
+                        </div>
+                        <div class="pi-match-days-text-right"></div>
+                    </div> 
+                    <div class="pi-bottom">
+                        <div class="pi-bottom-match"><div class="pi-b-m-top"></div><div class="pi-b-m-bottom"></div>
+                        </div><div class="pi-bottom-btn-wrapper">
+                            <div class="pi-bottom-btn pi-bottom-left">
+                            </div><div class="pi-bottom-matchday"></div><div class="pi-bottom-btn pi-bottom-right">
+                            </div>
+                        </div>
+
+                        <div id="" class="rating-player last">
+                            <div class="np-rate-width "></div><div class="arrow-right"></div><div class="re-shirt">  2   </div><h1 class="re-player"></h1><div class="re-goals hidden"></div><div class="re-cards-yellow hidden"></div><div class="re-cards-yr hidden"></div><div class="re-cards-red hidden"></div><h1 class="re-rating-match ">6.1</h1><p class="score ">7</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mb-60"></div>
+            </div>
+
+        </div>
+
+
+        <div class="bottom-nav">
+            <a class="bn-button" href="dashboard.html" data-ajax="false">HOME</a><a class="bn-button" href="club_stats.html" data-ajax="false">CLUB</a><a class="bn-button" href="league.html" data-ajax="false">LEAGUE</a><a class="bn-button active" href="stats.html" data-ajax="false">STARSTATS</a>
+        </div>
+    </body>
+</html>

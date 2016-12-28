@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+
+<html>
+    <head>
+        <meta charset="utf-8" />
+        <meta name="format-detection" content="telephone=no" />
+        <meta name="msapplication-tap-highlight" content="no" />
+        <!-- WARNING: for iOS 7, remove the width=device-width and height=device-height attributes. See https://issues.apache.org/jira/browse/CB-4323 -->
+        <meta name="viewport" content="user-scalable=no, initial-scale=1, maximum-scale=1, minimum-scale=1, width=device-width, height=device-height " />
+        <link rel="stylesheet" type="text/css" href="css/index.css" />
+        <link rel="stylesheet" type="text/css" href="css/jquery.mobile.custom.structure3.css" />
+        <link rel="stylesheet" type="text/css" href="css/jquery.sidr.dark.css" />
+        <title>Fixtures</title>
+        <script type="text/javascript" src="cordova.js"></script>
+        <script src="js/lib/require.js"></script>
+        <script src="js/config.js"></script>
+        <script type="text/javascript">
+          require(['jquery'], function ($) {
+
+                
+          });
+        </script>
+    </head>
+    <body style='background-color: #EC1C24;'>
+        <div id="sidemenu" class="lgrey-bg side-menu" >
+
+            <div class="header panel-header">
+                <div class="h-menu-back"></div>
+            </div>
+            <div class="panel-bar">
+                <div class="pb-text pb-center">
+                    <div class="sm-username"></div>
+                </div>
+                <div class="swipe-bar-shadow"></div>
+            </div>
+            <div class="sm-pp-wrapper lgrey-bg">
+                <div class="sm-pp">
+                </div>
+            </div>
+            <div style="height: 57px; border-bottom: 1px solid #FFFFFF;" ></div>
+            <div class="sm-scroll-wrapper">
+                <a class="sm-button" id="sm-b-db" href="dashboard.html" data-ajax="false">Dashboard</a>
+                <a class="sm-button" id="sm-b-fan" href="dashboard.html" data-ajax="false">Fan Profile</a>
+                <a class="sm-button" id="sm-b-blog" onclick="window.open('http://www.starating.net/blog', '_system'); return false;" data-ajax="false">Blog</a>
+                <a class="sm-button" id="sm-b-tw" onclick="window.open('http://twitter.com/StaRatingEPL', '_system'); return false;" data-ajax="false">Twitter</a>
+                <a class="sm-button" id="sm-b-set" data-ajax="false">Settings</a>
+                <a class="sm-button last" id="sm-b-tnc" href="terms_and_conditions.html" data-ajax="false">T's &amp; C's</a>
+                <div class="h-40"></div>
+                <a class="sm-other-button sm-other-button-red" id="sm-b-tell" data-ajax="false">Tell a Friend</a>
+                <a class="sm-other-button mb-30" id="sm-b-signout" href="index.html" data-ajax="false">log Out</a>
+            </div>
+
+        </div>
+    </body>
+</html>
+
+
+<!--<div data-theme="a" data-display="push" data-position="left" id="sidemenu" data-role="panel" class="grey-bg side-menu">-->

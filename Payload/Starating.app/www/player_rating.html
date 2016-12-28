@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="format-detection" content="telephone=no" />
+    <meta name="msapplication-tap-highlight" content="no" />
+    <!-- WARNING: for iOS 7, remove the width=device-width and height=device-height attributes. See https://issues.apache.org/jira/browse/CB-4323 -->
+    <meta name="viewport" content="user-scalable=no, initial-scale=1, maximum-scale=1, minimum-scale=1, width=device-width, height=device-height " />
+    <link rel="stylesheet" type="text/css" href="css/index.css" />
+    <title>Welcome</title>
+    <script type="text/javascript" src="cordova.js"></script>
+    <script src="js/lib/require.js"></script>
+    <script src="js/config.js"></script>
+    <script type="text/javascript">
+      require(['jquery', 'rating_controller', 'socialsharing', 'dragend', 'general'], function ($, rating_controller, socialsharing, dragend, general) {
+
+        general.showLoader();
+        $('body .bn-button').off();
+
+        setTimeout(function() { if ($('.spinner-overlay').data('display') == "0") $('.spinner-overlay').show();}, 500);
+
+        var isHome = true;
+        var wasShown = false;
+
+        var club_stats_c;
+        var matchid = 1;
+        var query = window.location.search.substring(1);
+        var pathArray = query.split("&");
+        if (pathArray[0].indexOf('match') > -1) {
+            pathArray = pathArray[0].split('=');
+            matchid = pathArray[1];
+        }
+
+        //Swipe stuff - dragend js
+
+        var prevpage = 0;
+
+        var setPrevPage = function(pp) {
+          prevpage = pp;
+        }
+
+        var dragendObj;
+
+        $("#swipe-content").dragend({
+          jumpToPage: 1,
+          onSwipeEnd: function() {
+            // console.log(this.page);
+            // console.log(prevpage);
+            if (this.page == prevpage) {
+              // console.log("test");
+              return;
+            }
+            $('.content').removeClass('ui-page-active');
+
+            currentPage = this.page;
+            if (currentPage == 0) {
+              currentPage = this.pages.length - 2;
+            }
+
+            if (currentPage == this.pages.length-1) {
+              currentPage = 1;
+            }
+
+            prevpage = currentPage;
+
+            $cr = $("#swipe-content li").eq(currentPage);
+            $cr.find('.content').addClass('ui-page-active');
+
+            rating_controller.jumpPage(currentPage);
+            
+          },
+          afterInitialize: function() {
+            this.container.style.visibility = "visible";
+            $("#swipe-content li:nth-child(1)").find('.content').addClass('ui-page-active');
+            prevpage = 0;
+            dragendObj = this;
+            rating_controller.initRating(matchid, dragendObj, setPrevPage);
+          }
+        });
+
+        $('.share-skip').on('click', function(e) {
+            window.location.href = "dashboard.html?md=" + rating_controller.getMatchDayOfMatch();
+        });
+
+            
+      });
+    </script>
+  </head>
+  <body style='background-color: #EC1C24;' class="fav-bg">
+    <div class="sm-overlay"></div>
+    <div class="header">
+        <div class="header-back"><div class="h-arrow-left"></div></div>
+        <!--<div class="header-menu" id="side-menu-link" href="#sidemenu" data-ajax="false"></div>-->
+        <!--<h2 class="header-title">Dashboard</h2>-->
+    </div>
+
+    <!-- <div class="spinner-overlay" style="display:none;" data-display="0">
+      <div class="spinner">
+        <div class="rect1"></div>
+        <div class="rect2"></div>
+        <div class="rect3"></div>
+        <div class="rect4"></div>
+        <div class="rect5"></div>
+      </div>
+      <div class="spinner-text"><h2>Slow connection, still loading...</h2></div>
+    </div> -->
+    <div id="swipe-content">
+      <ul>
+        <li class="dragend-page">
+          <div class="content c-rate" data-prev="player_rating" data-next="player_rating" data-role="page" data-type="plrating" data-dom-cache="true">
+              <div class="swipe-bar">
+                  <div class="sb-text sb-left">
+                      <!--Lineups-->
+                  </div><div class="sb-text sb-center">
+                      <!-- Player Ratings -->
+                  </div><div class="sb-text sb-right">
+                      <!--My Ratings-->
+                  </div>
+                  <div class="swipe-bar-shadow"></div>
+              </div>
+              <div class="inner-content" style="display:none;">
+                  <div class="h-92"></div>
+                  <div class="match-cont hw-accel">
+                  </div>
+                  <div class="info-box-dd centre last">
+                      <div class="ib-dd-top">
+                          <h4><span class="arrow-up"></span>Add My Ratings<span class="arrow-up"></span></h4>
+                      </div>
+                      <div class="ib-dd-content">
+                          <div id='rating-options-container' class="rating-options mt-10"></div>
+                      </div>
+                  </div>
+                  <div id="player-scrolling-container" class="prating-swipe hw-accel" style="position: absolute; margin-top: 0px; top: 205px; left: 0px; right: 0px; overflow: auto; bottom: 49px;">
+                      <div class="rating-options-ghost"></div>
+                      <div id='players-container' class="player-list bb-1-white" style="overflow: auto;"></div>
+                      <a class="medium-button inactive next-rating-button mb-10" style="display: none;" href='javascript:void(0)'>Rate opponent</a>
+                      <a class="medium-text-button submit-rating-button mt-10" style="display: none;" href='javascript:void(0)'><span class="mtb-decoration">&bull;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&bull;</span>&nbsp;&nbsp;&nbsp;&nbsp;submit now&nbsp;&nbsp;&nbsp;&nbsp;<span class="mtb-decoration">&bull;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&bull;</span></a>
+                      <!--<a class="button white-button test-share-button mb-10 mt-10" href='javascript:void(0)'>Share</a>-->
+                  </div>
+                  <div id="share-container" style="display: none;"><canvas id="share-canvas" width="300" height="480"></canvas></div>
+                  <div id="share-buttons" style="display: none;">
+                      <a class="long-button share-button mb-10 mt-10" href='javascript:void(0)'>Share</a>
+                      <a class="other-button share-skip mb-10 mt-10" href='javascript:void(0)'>Skip</a>
+                  </div>
+                  <div class="mb-60"></div>
+              </div>
+          </div>
+        </li>
+        <li class="dragend-page">
+          <div class="content c-rate" data-prev="player_rating" data-next="player_rating" data-role="page" data-type="plrating" data-dom-cache="true">
+              <div class="swipe-bar">
+                  <div class="sb-text sb-left">
+                      <!--Lineups-->
+                  </div><div class="sb-text sb-center">
+                      <!-- Player Ratings -->
+                  </div><div class="sb-text sb-right">
+                      <!--My Ratings-->
+                  </div>
+                  <div class="swipe-bar-shadow"></div>
+              </div>
+              <div class="inner-content hw-accel" style="display:none;">
+                  <div class="h-92"></div>
+                  <div class="match-cont">
+                  </div>
+                  <div class="info-box-dd centre last">
+                      <div class="ib-dd-top">
+                          <h4><span class="arrow-up"></span>Add My Ratings<span class="arrow-up"></span></h4>
+                      </div>
+                      <div class="ib-dd-content">
+                          <div id='rating-options-container' class="rating-options mt-10"></div>
+                      </div>
+                  </div>
+                  <div id="player-scrolling-container" class=" prating-swipe" style="position: absolute; margin-top: 0px; top: 205px; left: 0px; right: 0px; overflow: auto; bottom: 49px;">
+                      <div class="rating-options-ghost"></div>
+                      <div id='players-container' class="player-list bb-1-white" style="overflow: auto;"></div>
+                      <a class="medium-button inactive next-rating-button mb-10" style="display: none;" href='javascript:void(0)'>Rate opponent</a>
+                      <a class="medium-text-button submit-rating-button mt-10" style="display: none;" href='javascript:void(0)'><span class="mtb-decoration">&bull;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&bull;</span>&nbsp;&nbsp;&nbsp;&nbsp;submit now&nbsp;&nbsp;&nbsp;&nbsp;<span class="mtb-decoration">&bull;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&bull;</span></a>
+                      <!--<a class="button white-button test-share-button mb-10 mt-10" href='javascript:void(0)'>Share</a>-->
+                  </div>
+                  <div id="share-container" style="display: none;"><canvas id="share-canvas" width="300" height="480"></canvas></div>
+                  <div id="share-buttons" style="display: none;">
+                      <a class="long-button share-button mb-10 mt-10" href='javascript:void(0)'>Share</a>
+                      <a class="other-button share-skip mb-10 mt-10" href='javascript:void(0)'>Skip</a>
+                  </div>
+                  <div class="mb-60"></div>
+              </div>
+          </div>
+        </li>
+      </ul>
+    </div>
+    <div class="bottom-nav">
+        <a class="bn-button active" href="dashboard.html" data-ajax="false">HOME</a><a class="bn-button" href="club_stats.html" data-ajax="false">CLUB</a><a class="bn-button" href="league.html" data-ajax="false">LEAGUE</a><a class="bn-button" href="stats.html" data-ajax="false">STARSTATS</a>
+    </div>
+  </body>
+</html>

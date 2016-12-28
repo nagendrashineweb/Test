@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="format-detection" content="telephone=no" />
+    <meta name="msapplication-tap-highlight" content="no" />
+    <!-- WARNING: for iOS 7, remove the width=device-width and height=device-height attributes. See https://issues.apache.org/jira/browse/CB-4323 -->
+    <meta name="viewport" content="user-scalable=no, initial-scale=1, maximum-scale=1, minimum-scale=1, width=device-width, height=device-height " />
+    <link rel="stylesheet" type="text/css" href="css/index.css" />
+    <title>Welcome</title>
+    <script type="text/javascript" src="cordova.js"></script>
+    <script src="js/lib/require.js"></script>
+    <script src="js/config.js"></script>
+    <script type="text/javascript">
+      require(['jquery', 'rating_controller', 'socialsharing', 'general'], function ($, rating_controller, socialsharing, general) {
+
+        general.showLoader();
+
+        var isHome = true;
+        var wasShown = false;
+
+        var club_stats_c;
+        var matchid = 1;
+        var query = window.location.search.substring(1);
+        var pathArray = query.split("&");
+        if (pathArray[0].indexOf('match') > -1) {
+            pathArray = pathArray[0].split('=');
+            matchid = pathArray[1];
+        }
+
+        var fakeDragend = {
+
+          jumpToPage: function(page) {
+            if (page == 1) {
+              $('.inner-content .inner-content').eq(0).show();
+              $('.inner-content .inner-content').eq(1).hide();
+            } else {
+              $('.inner-content .inner-content').eq(0).hide();
+              $('.inner-content .inner-content').eq(1).show();
+            }
+            
+          }
+        };
+
+        var prevpage = 0;
+
+        var setPrevPage = function(pp) {
+          prevpage = pp;
+        }
+
+
+        rating_controller.initRating(matchid, fakeDragend, setPrevPage, true);
+            
+      });
+    </script>
+  </head>
+  <body style='background-color: #EC1C24;' class="fav-bg">
+    <div class="header">
+      <div class="header-back"><div class="h-arrow-left"></div></div>
+      <h2 class="header-title"><span class="header-title-dash">&mdash;</span> Training Drill 2 <span class="header-title-dash">&mdash;</span></h2>
+    </div>
+    <div class="under-header"></div>
+    <div class="content">
+      <div class="inner-content onb-content" style="display:none;">
+        <h1 class="onboard-title">Get stuck in</h1>
+        <h2 class="onboard-subtitle">Let's hear what you ahave to say.</h2>
+        <div class="dash-divider"></div>
+        <div class="onboard-stars">
+          <div class="onboard-star"></div><div class="onboard-star onboard-star-sel"></div><div class="onboard-star"></div>
+        </div>
+
+        <div class="inner-content ui-page-active" style="display: block; overflow: hidden; height: auto; border-bottom: 1px solid rgb(255, 255, 255);" >
+          <div class="match-cont" style="margin-top: 0;">
+          </div>
+          <div class="info-box-dd centre last">
+              <div class="ib-dd-top">
+                  <h4><span class="arrow-up"></span>Add My Ratings<span class="arrow-up"></span></h4>
+              </div>
+              <div class="ib-dd-content">
+                  <div id='rating-options-container' class="rating-options mt-10"></div>
+              </div>
+          </div>
+          <div style="height:1px; margin-top:-1px; width:100%; background-color:#FFFFFF;"></div>
+          <h2 class="onboard-subtitle2" id="onb-sub1">Current averages are shown below.</br>Tap add my ratings to add your voice to the mix</h2>
+          <h2 class="onboard-subtitle2" id="onb-sub2" style="display:none;">To give a player no rating, tap twice on their name</br>(good for last minute subs).</h2>
+          <div id="player-scrolling-container" class="prating-swipe tp-0imp" style="position: relative; margin-top: 0px; top: 0; left: 0px; right: 0px; overflow: auto; height: 329px; border-top: 1px solid #ffffff;">
+              <div class="rating-options-ghost"></div>
+              <div id='players-container' class="player-list hw-accel" style="overflow: auto; margin-top: -1px;"></div>
+              <a class="long-button next-rating-button mb-10 mt-10" style="display: none;" href='javascript:void(0)'>Rate opponent</a>
+              <a class="long-button submit-rating-button mb-10 mt-10" style="display: none;" href='javascript:void(0)'>Submit now</a>
+          </div>
+        </div>
+
+        <div class="inner-content" style="display: none; overflow: hidden; height: auto; border-bottom: 1px solid rgb(255, 255, 255);" >
+          <div class="match-cont" style="margin-top: 0;">
+          </div>
+          <div class="info-box-dd centre last">
+              <div class="ib-dd-top">
+                  <h4><span class="arrow-up"></span>Add My Ratings<span class="arrow-up"></span></h4>
+              </div>
+              <div class="ib-dd-content">
+                  <div id='rating-options-container' class="rating-options mt-10"></div>
+              </div>
+          </div>
+          <div style="height:1px; margin-top:-1px; width:100%; background-color:#FFFFFF;"></div>
+          <h2 class="onboard-subtitle2" id="onb-sub1">Current averages are shown below.</br>Tap add my ratings to add your voice to the mix</h2>
+          <h2 class="onboard-subtitle2" id="onb-sub2" style="display:none;">To give a player no rating, tap twice on their name</br>(good for last minute subs).</h2>
+          <div id="player-scrolling-container" class="prating-swipe tp-0imp" style="position: relative; margin-top: 0px; top: 0; left: 0px; right: 0px; overflow: auto; height: 329px; border-top: 1px solid #ffffff;">
+              <div class="rating-options-ghost"></div>
+              <div id='players-container' class="player-list hw-accel" style="overflow: auto; margin-top: -1px;"></div>
+              <a class="long-button next-rating-button mb-10 mt-10" style="display: none;" href='javascript:void(0)'>Rate opponent</a>
+              <a class="long-button submit-rating-button mb-10 mt-10" style="display: none;" href='javascript:void(0)'>Submit now</a>
+          </div>
+        </div>
+
+        <div class="onboard-bottom">
+          <div class="dash-divider"></div>
+          <a class="text-button" href='dashboard.html'>skip this bit</a>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>

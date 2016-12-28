@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+
+<html>
+    <head>
+        <meta charset="utf-8" />
+        <meta name="format-detection" content="telephone=no" />
+        <meta name="msapplication-tap-highlight" content="no" />
+        <!-- WARNING: for iOS 7, remove the width=device-width and height=device-height attributes. See https://issues.apache.org/jira/browse/CB-4323 -->
+        <meta name="viewport" content="user-scalable=no, initial-scale=1, maximum-scale=1, minimum-scale=1, width=device-width, height=device-height " />
+        <link rel="stylesheet" type="text/css" href="css/index.css" />
+        <title>Welcome</title>
+        <script type="text/javascript" src="cordova.js"></script>
+        <script src="js/lib/require.js"></script>
+        <script src="js/config.js"></script>
+        <script type="text/javascript">
+          require(['jquery','index', 'hello' ], function ($, app, hello) {
+              //app.initialize();
+
+              /*hello.init({
+                  google : '656984324806-sr0q9vq78tlna4hvhlmcgp2bs2ut8uj8.apps.googleusercontent.com',
+                  facebook : '285512884961804',
+                  windows : '00000000400D8578',
+                  twitter: 'El2QwNPWW8fwsr603jBv2crxF'
+              }, {
+                //redirect_uri : 'http://localhost:8888/login.html'
+                 redirect_uri : document.URL
+              });*/
+
+              $('.fb-button').on('click', function(){
+                post('facebook');
+              });
+
+              $('.tw-button').on('click', function(){
+                post('twitter');
+              });
+
+              $('#skip').on('click', function(){
+                window.location.href = "dashboard.html";
+              });
+
+              function post(network){
+              hello(network).login({scope:'publish_actions'}, function(){
+              	hello(network).api('me/share', 'post', {message: $('#share-message').val()}, function(r){
+              			if(!r||r.error){
+              				alert("Whoops! "+r.error.message);
+              			}
+              			else{
+              				console.log("Your message has been published to "+ network);
+                      window.location.href = "dashboard.html";
+              			}
+              		});
+              	})
+              }
+
+              $('.inner-content').fadeIn();
+
+          });
+        </script>
+    </head>
+    <body style='background-color: #EC1C24;'>
+        <div class="header">
+            <div class="header-back"><div class="h-arrow-left"></div></div>
+            <h2 class="header-title">Sign Up</h2>
+        </div>
+        <div class="content content-h">
+          <div class="inner-content" style="display:none;">
+            <div class="h-64"></div>
+            <!--<h2>Log in with</h2>
+            <button class="button fb-button" id='fb'>Facebook</button>
+            <button class="button tw-button" id='tw'>Twitter</button>-->
+
+            <div class="step-three"></div>
+
+            <h2>Let Your Friends Know You're A starater</h2>
+            <textarea id='share-message' class='share-box white-textarea'>I've joined StaRating. We're bringing power back to the fans.</textarea>
+            <h3>POST ON</h3>
+            <button class="button fb-button" id='fb'><div class="center"><div class="fb-logo"></div><div class="fb-text">Facebook</div></div></button>
+            <button class="button tw-button" id='tw'><div class="center"><div class="tw-logo"></div><div class="tw-text">Twitter</div></div></button>
+            <button class="button white-button mb-10" id='skip'>Skip</button>
+          </div>
+        </div>
+    </body>
+</html>

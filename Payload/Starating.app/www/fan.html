@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+
+<html>
+    <head>
+        <meta charset="utf-8" />
+        <meta name="format-detection" content="telephone=no" />
+        <meta name="msapplication-tap-highlight" content="no" />
+        <!-- WARNING: for iOS 7, remove the width=device-width and height=device-height attributes. See https://issues.apache.org/jira/browse/CB-4323 -->
+        <meta name="viewport" content="user-scalable=no, initial-scale=1, maximum-scale=1, minimum-scale=1, width=device-width, height=device-height " />
+        <link rel="stylesheet" type="text/css" href="css/index.css" />
+        <title>Fan Profile</title>
+        <script type="text/javascript" src="cordova.js"></script>
+        <script src="js/lib/require.js"></script>
+        <script src="js/config.js"></script>
+        <script type="text/javascript">
+            require(['jquery', 'fan_controller', 'user', 'general' ], function ($, fan_controller, user, general) {
+
+                general.showLoader();
+
+                fan_controller.init();
+                
+            });
+        </script>
+    </head>
+    <body class="fav-bg">
+        <div class="sm-overlay"></div>
+        <div class="header">
+            <div class="header-back"><div class="h-arrow-left"></div></div>
+        </div>
+        <!-- <div class="spinner-overlay" style="display:none;" data-display="0">
+          <div class="spinner">
+            <div class="rect1"></div>
+            <div class="rect2"></div>
+            <div class="rect3"></div>
+            <div class="rect4"></div>
+            <div class="rect5"></div>
+          </div>
+        </div> -->
+        <div class="content swipe-page" data-role="page" data-prev="fixtures" data-next="club_squad" data-type="stats" data-dom-cache="true">
+            <div class="swipe-bar">
+                <div class="sb-text sb-left">
+                </div><div class="sb-text sb-center">
+                    Fan Profile
+                </div><div class="sb-text sb-right">
+                </div>
+                <div class="swipe-bar-shadow"></div>
+            </div>
+            <div class="inner-content" style="display:none;">
+                <div class="h-92"></div>
+                <div class="title-nav title-nav-club">
+                    <div class="title-bar" id="title-username"></div>
+                    <div class="title-team-badge"></div>
+                </div>
+                <div class="info-box fav-team-link" data-ajax="false">
+                    <h4>Favourite Team :</h4>
+                    <h5 id="fan-fav-team"></h5>
+                </div>
+                <!-- <a href="" id="team-prev-href" class="info-box" data-ajax="false">
+                    <h4>Hero :</h4>
+                    <h5 id="fan-hero"></h5>
+                </a> -->
+                <div id="team-next-href" class="info-box mb-0" data-ajax="false">
+                    <h4>Matches Rated :</h4>
+                    <h5 id="fan-matches"></h5>
+                </div>
+                <div class="info-box-dd">
+                    <div class="ib-dd-top">
+                        <span class="arrow-up open"></span><h4>Highest Rated</h4>
+                    </div>
+                    <div class="ib-dd-content active" style="display:block;">
+                        <div id="team-top-players"></div>
+                    </div>
+                </div>
+                <div class="info-box-dd last">
+                    <div class="ib-dd-top">
+                        <span class="arrow-up"></span><h4>Lowest Rated</h4>
+                    </div>
+                    <div class="ib-dd-content">
+                        <div id="team-bottom-players"></div>
+                    </div>
+                </div>
+                <br/>
+                <div class="mb-60"></div>
+            </div>
+        </div>
+        <div class="bottom-nav">
+            <a class="bn-button" href="dashboard.html" data-ajax="false">HOME</a><a class="bn-button" href="club_stats.html" data-ajax="false">CLUB</a><a class="bn-button" href="league.html" data-ajax="false">LEAGUE</a><a class="bn-button" href="stats.html" data-ajax="false">STARSTATS</a>
+        </div>
+    </body>
+</html>
